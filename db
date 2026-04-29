@@ -1,0 +1,6 @@
+CREATE TABLE image_features (
+    id SERIAL PRIMARY KEY,
+    image_path VARCHAR(500) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    features FLOAT[] NOT NULL
+);
