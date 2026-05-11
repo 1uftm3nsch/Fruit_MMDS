@@ -1,10 +1,14 @@
 import psycopg2
 import numpy as np
-from feature_extractor import extract_features
+
+try:
+    from .feature_extractor import extract_features
+except ImportError:
+    from feature_extractor import extract_features
 
 # ================= DATABASE CONFIGURATION =================
 DB_HOST = "localhost"
-DB_PORT = "5433" 
+DB_PORT = "5432" 
 DB_NAME = "fruit_mmdb"  
 DB_USER = "postgres"     
 DB_PASS = "1" 
@@ -28,6 +32,8 @@ class Searcher:
     def search(self, query_features, top_k=5):
         """Function to compare and find the most similar images."""
         results = []
+        query_features = np.asarray(query_features, dtype=np.float32)
+        query_dimension = query_features.shape[0]
         
         # Loop through each record in the database
         for row in self.db_data:
@@ -35,7 +41,13 @@ class Searcher:
             label = row[1]
             
             # PostgreSQL returns a standard list, convert it back to Numpy Array for calculation
-            db_features = np.array(row[2])
+            db_features = np.asarray(row[2], dtype=np.float32)
+            if db_features.shape[0] != query_dimension:
+                raise ValueError(
+                    "Feature dimension mismatch: "
+                    f"query has {query_dimension}, database has {db_features.shape[0]}. "
+                    "Please re-run src/indexer_postgres.py to rebuild the feature database."
+                )
             
             # Calculate Euclidean distance
             distance = np.linalg.norm(query_features - db_features)

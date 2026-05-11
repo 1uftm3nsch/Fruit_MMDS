@@ -283,6 +283,11 @@ class FruitSearchGUI:
         # Create a grid frame to hold the cards
         grid_frame = tk.Frame(self.scrollable_frame, bg="white")
         grid_frame.pack(expand=True, padx=20)
+
+        distances = [distance for distance, _, _ in self.search_results]
+        min_distance = min(distances)
+        max_distance = max(distances)
+        distance_range = max_distance - min_distance
         
         # Configure grid for 3 columns
         for col in range(3):
@@ -353,8 +358,11 @@ class FruitSearchGUI:
             )
             distance_label.pack(anchor=tk.CENTER, pady=2)
             
-            # Similarity bar
-            similarity = max(0, (1 - min(distance, 1.0))) * 100
+            # Similarity bar: lower distance means higher relative similarity.
+            if distance_range == 0:
+                similarity = 100.0
+            else:
+                similarity = (1 - ((distance - min_distance) / distance_range)) * 100
             bar_frame = tk.Frame(details_frame, bg="white")
             bar_frame.pack(anchor=tk.CENTER, fill=tk.X, pady=5, padx=5)
             
